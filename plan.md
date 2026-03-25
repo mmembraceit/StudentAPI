@@ -1,51 +1,60 @@
 # Plan de implementación .NET
 
-## Estado recuperado
+## Estado actual (actualizado)
 
-- El roadmap acordado existe en `DeployPlan.md`.
-- El workspace actual no contiene todavía una solución `.NET` ni proyectos de código.
-- Por tanto, aunque el seguimiento previo menciona `Phase 2`, el estado real del repositorio sigue antes de la implementación de `Phase 1`.
+### Completado
 
-## Roadmap
+1. Phase 1 - Estructura base
+- Solution creada: StudentApi.slnx
+- Proyectos creados: Domain, Application, Infrastructure, Presentation, UnitTests, IntegrationTests
+- Referencias entre capas configuradas
+- Compilación base validada
 
-1. Phase 0 → Setup de entorno y conceptos base de .NET
-2. Phase 1 → Crear la Solution y los proyectos de Clean Architecture
-3. Phase 2 → Construir la capa Domain
-4. Phase 3 → Construir la capa Application
-5. Phase 4 → Construir la capa Infrastructure con EF Core, Repository Pattern, configuraciones de entidades y migraciones
-6. Phase 5 → Construir la capa Presentation y el CRUD básico de Student
-7. Phase 6 → Añadir validaciones con FluentValidation
-8. Phase 7 → Implementar manejo global de errores con middleware
-9. Phase 8 → Estandarizar respuestas con un Generic API Response Wrapper
-10. Phase 9 → Implementar autenticación JWT y proteger endpoints
-11. Phase 10 → Implementar multi-tenancy con TenantId, aislamiento, transacciones y seeding de datos
-12. Phase 11 → Añadir integraciones reales: Redis cache, Azure Service Bus, SignalR y Webhooks
-13. Phase 12 → Añadir logging estructurado con Serilog y aplicar seguridad OWASP, CORS y headers
+2. Phase 2 - Domain (versión minimalista)
+- Entidad Student creada como record en src/StudentApi.Domain/Entities/Student.cs
+- Modelo actual: Id, TenantId, Name, DateOfBirth
+- Enfoque aplicado: entidad mínima, sin sobrecargar reglas en Domain por ahora
 
-## Punto de reanudación recomendado
+3. Phase 3 - Application (parcial)
+- Contratos y modelos base creados:
+	- Interfaces/IStudentRepository.cs
+	- Students/StudentDto.cs
+	- Students/CreateStudentRequest.cs
+	- Students/UpdateStudentRequest.cs
+	- Mappings/StudentMappings.cs
 
-### Si el código anterior se perdió o estaba en otra carpeta
+## Pendiente para completar el proyecto
 
-Retomar desde `Phase 1` en este repositorio:
+1. Finalizar Phase 3 - Application
+- Implementar casos de uso/servicio CRUD de Student
+- Definir resultados y manejo de errores de aplicación
 
-- crear la solution
-- crear proyectos `Domain`, `Application`, `Infrastructure`, `Presentation`
-- agregar referencias entre capas
-- dejar compilación base funcionando
+2. Phase 4 - Infrastructure
+- Crear ApplicationDbContext con EF Core
+- Implementar IStudentRepository con EF Core y filtro por TenantId
+- Configurar IEntityTypeConfiguration para Student
+- Añadir migraciones y transacciones
+- Añadir seeding inicial sin duplicados
 
-### Si `step 2` se refería al roadmap pedagógico
+3. Phase 5 - Presentation
+- Crear endpoints CRUD de Student
+- Conectar DI de servicios y repositorios
 
-El `step 2` corresponde a ordenar el aprendizaje desde fundamentos hasta aspectos transversales de una API real, y ya quedó reflejado en la secuencia de fases anterior.
+4. Fases transversales
+- Validaciones con FluentValidation
+- Middleware global de excepciones
+- ApiResponse wrapper genérico
+- JWT y protección de endpoints
+- Multi-tenancy end-to-end (middleware + aislamiento en consultas)
+- Logging estructurado con Serilog
+- OWASP basics: CORS y security headers
 
-### Si `Phase 2` se refería a implementación
+5. Integraciones reales
+- Redis cache
+- Azure Service Bus
+- SignalR
+- Webhook en al menos una acción
 
-La siguiente entrega funcional sería la capa `Domain`, pero sólo después de crear la solution y la estructura base de proyectos en este workspace.
+## Siguiente paso inmediato
 
-## Entrega siguiente sugerida
-
-Implementar `Phase 1` en este repositorio y, a continuación, continuar con `Phase 2` construyendo:
-
-- entidad `Student`
-- value objects o reglas mínimas del dominio si aplican
-- contratos base o primitivas compartidas del dominio
-- uso de `record` donde tenga sentido
+Implementar Phase 4 (Infrastructure) método por método para IStudentRepository usando EF Core y multi-tenancy.
