@@ -12,5 +12,5 @@ public interface IStudentService
 
     Task<StudentDto> UpdateAsync(Guid id, Guid tenantId, UpdateStudentRequest request, CancellationToken cancellationToken = default);
 
-    Task DeleteAsync(Guid id, Guid tenantId, CancellationToken cancellationToken = default);
+    Task DeleteAsync(DeleteStudentRequest request, CancellationToken cancellationToken = default);
 }

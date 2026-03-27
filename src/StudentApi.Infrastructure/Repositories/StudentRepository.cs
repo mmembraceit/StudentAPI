@@ -41,7 +41,7 @@ public class StudentRepository : IStudentRepository
         _dbContext.Students.Update(student);
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
-
+    
     public async Task DeleteAsync(Guid id, Guid tenantId, CancellationToken cancellationToken = default)
     {
         var student = await _dbContext.Students

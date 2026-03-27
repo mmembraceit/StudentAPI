@@ -62,15 +62,15 @@ public class StudentService : IStudentService
         return updatedStudent.ToDto();
     }
 
-    public async Task DeleteAsync(Guid id, Guid tenantId, CancellationToken cancellationToken = default)
+    public async Task DeleteAsync(DeleteStudentRequest request, CancellationToken cancellationToken = default)
     {
-        var currentStudent = await _studentRepository.GetByIdAsync(id, tenantId, cancellationToken);
+        var currentStudent = await _studentRepository.GetByIdAsync(request.Id, request.TenantId, cancellationToken);
 
         if (currentStudent is null)
         {
-            throw new KeyNotFoundException($"Student with id '{id}' was not found for tenant '{tenantId}'.");
+            throw new KeyNotFoundException($"Student with id '{request.Id}' was not found for tenant '{request.TenantId}'.");
         }
 
-        await _studentRepository.DeleteAsync(id, tenantId, cancellationToken);
+        await _studentRepository.DeleteAsync(request.Id, request.TenantId, cancellationToken);
     }
 }
