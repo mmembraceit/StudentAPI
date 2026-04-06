@@ -4,8 +4,14 @@ using StudentApi.Domain.Entities;
 
 namespace StudentApi.Infrastructure.Configurations;
 
+/// EF Core configuration for the <c>Student</c> entity.
+/// Defines database constraints and mapping without cluttering the DbContext.
+
 public class StudentConfiguration : IEntityTypeConfiguration<Student>
 {
+
+    /// Configures the table, primary key, required fields, length, and a compound index by tenant and name.
+    
     public void Configure(EntityTypeBuilder<Student> builder)
     {
         builder.ToTable("Students");

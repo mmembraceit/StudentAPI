@@ -7,8 +7,11 @@ using StudentApi.Infrastructure.Repositories;
 
 namespace StudentApi.Infrastructure.DependencyInjection;
 
+/// Entry point used to register Infrastructure dependencies.
+/// Invoked by <c>Program.cs</c> in Presentation to wire SQL Server, EF Core, and repositories.
 public static class InfrastructureServiceCollectionExtensions
 {
+    /// Registers the DbContext and the student repository.
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         var connectionString = configuration.GetConnectionString("DefaultConnection")
