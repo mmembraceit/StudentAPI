@@ -1,7 +1,8 @@
 namespace StudentApi.Presentation.Authentication;
 
-
+/// <summary>
 /// Creates signed JWT access tokens for authenticated users.
+/// </summary>
 public interface IJwtTokenService
 {
     /// <summary>

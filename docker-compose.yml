@@ -22,7 +22,7 @@ services:
   api:
     build:
       context: .
-      dockerfile: src/StudentApi.Presentation/Dockerfile
+      dockerfile: src/Presentation/Dockerfile
     environment:
       ASPNETCORE_ENVIRONMENT: "Development"
       ConnectionStrings__DefaultConnection: "Server=sqlserver,1433;Database=StudentApiDb;User Id=sa;Password=StudentApi#2026!Db;Encrypt=True;TrustServerCertificate=True;MultipleActiveResultSets=true"

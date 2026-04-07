@@ -15,44 +15,44 @@ This document explains how JWT authentication and authorization are implemented 
 
 ### Presentation
 
-- `src/StudentApi.Presentation/Program.cs`
+- `src/Presentation/Program.cs`
   - Registers JWT authentication and token validation.
   - Registers authorization policy `AdminOnly`.
   - Enforces startup validation for `Jwt__Key` (required, min 32 chars).
-- `src/StudentApi.Presentation/Controllers/AuthController.cs`
+- `src/Presentation/Controllers/AuthController.cs`
   - `POST /api/auth/login`
   - `POST /api/auth/refresh`
-- `src/StudentApi.Presentation/Authentication/JwtTokenService.cs`
+- `src/Presentation/Authentication/JwtTokenService.cs`
   - Creates access token with name and role claims.
-- `src/StudentApi.Presentation/Authentication/Pbkdf2PasswordHasher.cs`
+- `src/Presentation/Authentication/Pbkdf2PasswordHasher.cs`
   - Verifies hashed password from DB.
-- `src/StudentApi.Presentation/Controllers/StudentsController.cs`
+- `src/Presentation/Controllers/StudentsController.cs`
   - Protected by `[Authorize(Policy = "AdminOnly")]`.
 
 ### Application
 
-- `src/StudentApi.Application/Interfaces/IUserAuthRepository.cs`
-- `src/StudentApi.Application/Interfaces/IRefreshTokenRepository.cs`
+- `src/Application/Interfaces/IUserAuthRepository.cs`
+- `src/Application/Interfaces/IRefreshTokenRepository.cs`
 
 ### Domain
 
-- `src/StudentApi.Domain/Entities/UserAccount.cs`
-- `src/StudentApi.Domain/Entities/RefreshToken.cs`
+- `src/Domain/Entities/UserAccount.cs`
+- `src/Domain/Entities/RefreshToken.cs`
 
 ### Infrastructure
 
-- `src/StudentApi.Infrastructure/Repositories/UserAuthRepository.cs`
-- `src/StudentApi.Infrastructure/Repositories/RefreshTokenRepository.cs`
-- `src/StudentApi.Infrastructure/Configurations/UserAccountConfiguration.cs`
-- `src/StudentApi.Infrastructure/Configurations/RefreshTokenConfiguration.cs`
-- `src/StudentApi.Infrastructure/Persistence/ApplicationDbContext.cs`
+- `src/Infrastructure/Repositories/UserAuthRepository.cs`
+- `src/Infrastructure/Repositories/RefreshTokenRepository.cs`
+- `src/Infrastructure/Configurations/UserAccountConfiguration.cs`
+- `src/Infrastructure/Configurations/RefreshTokenConfiguration.cs`
+- `src/Infrastructure/Persistence/ApplicationDbContext.cs`
 
 ## 3. Database and Seed
 
 Migrations:
 
-- `src/StudentApi.Infrastructure/Persistence/Migrations/20260407072549_AddUserAccounts.cs`
-- `src/StudentApi.Infrastructure/Persistence/Migrations/20260407074609_AddRefreshTokens.cs`
+- `src/Infrastructure/Persistence/Migrations/20260407072549_AddUserAccounts.cs`
+- `src/Infrastructure/Persistence/Migrations/20260407074609_AddRefreshTokens.cs`
 
 Local seeded user:
 
@@ -77,7 +77,7 @@ Local run example (PowerShell):
 ```powershell
 $env:Jwt__Key="SuperLongLocalDevJwtSecretKey_ChangeMe_123456"
 $env:ASPNETCORE_URLS="http://localhost:5173"
-dotnet run --project .\src\StudentApi.Presentation\StudentApi.Presentation.csproj
+dotnet run --project .\src\Presentation\StudentApi.Presentation.csproj
 ```
 
 ## 5. Endpoint Contracts

@@ -19,8 +19,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\StudentApi.Application\StudentApi.Application.csproj" />
-    <ProjectReference Include="..\..\src\StudentApi.Domain\StudentApi.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Application\StudentApi.Application.csproj" />
+    <ProjectReference Include="..\..\src\Domain\StudentApi.Domain.csproj" />
   </ItemGroup>
 
 </Project>

@@ -4,7 +4,7 @@ This document lists all source files that use Redis directly or are part of the 
 
 ## 1) Cache Contract (Application Layer)
 
-- File: `src/StudentApi.Application/Interfaces/IStudentCacheService.cs`
+- File: `src/Application/Interfaces/IStudentCacheService.cs`
 - Purpose: Defines the cache operations used by the application service.
 - Methods:
   - `GetByIdAsync`
@@ -16,7 +16,7 @@ This document lists all source files that use Redis directly or are part of the 
 
 ## 2) Cache Usage (Application Service)
 
-- File: `src/StudentApi.Application/Students/Services/StudentService.cs`
+- File: `src/Application/Students/Services/StudentService.cs`
 - Purpose: Uses `IStudentCacheService` for read-through caching and invalidation.
 
 ### GET flow
@@ -30,7 +30,7 @@ This document lists all source files that use Redis directly or are part of the 
 
 ## 3) Redis Implementation (Infrastructure)
 
-- File: `src/StudentApi.Infrastructure/Caching/RedisStudentCacheService.cs`
+- File: `src/Infrastructure/Caching/RedisStudentCacheService.cs`
 - Purpose: Real implementation backed by `IDistributedCache` (StackExchange.Redis provider).
 
 ### Behavior
@@ -48,13 +48,13 @@ This document lists all source files that use Redis directly or are part of the 
 
 ## 4) No-Op Fallback (Infrastructure)
 
-- File: `src/StudentApi.Infrastructure/Caching/NoOpStudentCacheService.cs`
+- File: `src/Infrastructure/Caching/NoOpStudentCacheService.cs`
 - Purpose: Fallback implementation when Redis is not configured.
 - Behavior: returns null for reads and does nothing for writes/invalidation.
 
 ## 5) Dependency Injection Wiring
 
-- File: `src/StudentApi.Infrastructure/DependencyInjection/InfrastructureServiceCollectionExtensions.cs`
+- File: `src/Infrastructure/DependencyInjection/InfrastructureServiceCollectionExtensions.cs`
 - Purpose: Chooses Redis or fallback implementation based on config.
 
 ### Decision rule
@@ -67,16 +67,16 @@ This document lists all source files that use Redis directly or are part of the 
 
 ## 6) NuGet Package
 
-- File: `src/StudentApi.Infrastructure/StudentApi.Infrastructure.csproj`
+- File: `src/Infrastructure/StudentApi.Infrastructure.csproj`
 - Redis package:
   - `Microsoft.Extensions.Caching.StackExchangeRedis`
 
 ## 7) Configuration Files
 
-- File: `src/StudentApi.Presentation/appsettings.json`
+- File: `src/Presentation/appsettings.json`
   - Contains `Redis` section with default values (empty connection string by default).
 
-- File: `src/StudentApi.Presentation/appsettings.Development.json`
+- File: `src/Presentation/appsettings.Development.json`
   - Contains local Redis values:
     - `ConnectionString = localhost:6379`
     - `InstanceName = StudentApi:`
