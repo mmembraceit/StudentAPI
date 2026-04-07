@@ -1,4 +1,9 @@
 services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
     environment:
@@ -22,9 +27,13 @@ services:
       ASPNETCORE_ENVIRONMENT: "Development"
       ConnectionStrings__DefaultConnection: "Server=sqlserver,1433;Database=StudentApiDb;User Id=sa;Password=StudentApi#2026!Db;Encrypt=True;TrustServerCertificate=True;MultipleActiveResultSets=true"
       Jwt__Key: "${JWT_KEY}"
+      Redis__ConnectionString: "redis:6379"
+      Redis__InstanceName: "StudentApi:"
     ports:
       - "8080:8080"
     depends_on:
+      redis:
+        condition: service_started
       sqlserver:
         condition: service_healthy
 

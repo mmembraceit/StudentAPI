@@ -13,10 +13,12 @@ namespace StudentApi.Application.Students;
 public class StudentService : IStudentService
 {
     private readonly IStudentRepository _studentRepository;
+    private readonly IStudentCacheService _studentCacheService;
 
-    public StudentService(IStudentRepository studentRepository)
+    public StudentService(IStudentRepository studentRepository, IStudentCacheService studentCacheService)
     {
         _studentRepository = studentRepository;
+        _studentCacheService = studentCacheService;
     }
 
     
@@ -24,6 +26,13 @@ public class StudentService : IStudentService
     
     public async Task<StudentDto> GetByIdAsync(Guid id, Guid tenantId, CancellationToken cancellationToken = default)
     {
+        var cachedStudent = await _studentCacheService.GetByIdAsync(id, tenantId, cancellationToken);
+
+        if (cachedStudent is not null)
+        {
+            return cachedStudent;
+        }
+
         var student = await _studentRepository.GetByIdAsync(id, tenantId, cancellationToken);
 
         if (student is null)
@@ -31,7 +40,10 @@ public class StudentService : IStudentService
             throw new NotFoundException($"Student with id '{id}' was not found for tenant '{tenantId}'.");
         }
 
-        return student.ToDto();
+        var studentDto = student.ToDto();
+        await _studentCacheService.SetByIdAsync(studentDto, cancellationToken);
+
+        return studentDto;
     }
 
     
@@ -39,9 +51,19 @@ public class StudentService : IStudentService
     
     public async Task<IReadOnlyList<StudentDto>> GetAllAsync(Guid tenantId, CancellationToken cancellationToken = default)
     {
-        var students = await _studentRepository.GetAllAsync(tenantId, cancellationToken);
+        var cachedStudents = await _studentCacheService.GetAllAsync(tenantId, cancellationToken);
 
-        return students.Select(s => s.ToDto()).ToList();
+        if (cachedStudents is not null)
+        {
+            return cachedStudents;
+        }
+
+        var students = await _studentRepository.GetAllAsync(tenantId, cancellationToken);
+        var studentDtos = students.Select(s => s.ToDto()).ToList();
+
+        await _studentCacheService.SetAllAsync(tenantId, studentDtos, cancellationToken);
+
+        return studentDtos;
     }
 
    
@@ -59,7 +81,11 @@ public class StudentService : IStudentService
 
         await _studentRepository.AddAsync(student, cancellationToken);
 
-        return student.ToDto();
+        var studentDto = student.ToDto();
+        await _studentCacheService.SetByIdAsync(studentDto, cancellationToken);
+        await _studentCacheService.InvalidateAllAsync(student.TenantId, cancellationToken);
+
+        return studentDto;
     }
 
    
@@ -82,7 +108,11 @@ public class StudentService : IStudentService
 
         await _studentRepository.UpdateAsync(updatedStudent, cancellationToken);
 
-        return updatedStudent.ToDto();
+        var studentDto = updatedStudent.ToDto();
+        await _studentCacheService.SetByIdAsync(studentDto, cancellationToken);
+        await _studentCacheService.InvalidateAllAsync(tenantId, cancellationToken);
+
+        return studentDto;
     }
 
     
@@ -98,5 +128,7 @@ public class StudentService : IStudentService
         }
 
         await _studentRepository.DeleteAsync(request.Id, request.TenantId, cancellationToken);
+        await _studentCacheService.InvalidateByIdAsync(request.Id, request.TenantId, cancellationToken);
+        await _studentCacheService.InvalidateAllAsync(request.TenantId, cancellationToken);
     }
 }

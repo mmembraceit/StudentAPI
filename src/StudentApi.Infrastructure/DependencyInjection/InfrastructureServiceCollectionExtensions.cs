@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using StudentApi.Application.Interfaces;
+using StudentApi.Infrastructure.Caching;
 using StudentApi.Infrastructure.Persistence;
 using StudentApi.Infrastructure.Repositories;
 
@@ -19,6 +20,25 @@ public static class InfrastructureServiceCollectionExtensions
 
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(connectionString));
+
+        var redisConnectionString = configuration["Redis:ConnectionString"];
+        var redisInstanceName = configuration["Redis:InstanceName"] ?? "StudentApi:";
+
+        if (!string.IsNullOrWhiteSpace(redisConnectionString))
+        {
+            services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = redisConnectionString;
+                options.InstanceName = redisInstanceName;
+            });
+
+            services.AddScoped<IStudentCacheService, RedisStudentCacheService>();
+        }
+        else
+        {
+            services.AddDistributedMemoryCache();
+            services.AddScoped<IStudentCacheService, NoOpStudentCacheService>();
+        }
 
         services.AddScoped<IStudentRepository, StudentRepository>();
         services.AddScoped<IUserAuthRepository, UserAuthRepository>();

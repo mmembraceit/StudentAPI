@@ -1,31 +1,33 @@
 # JWT Authorization Guide
 
-This document describes the JWT authorization implementation added to StudentAPI, including architecture, configuration, role policy, refresh-token flow, and testing steps.
+This document explains how JWT authentication and authorization are implemented in StudentAPI and how to test them in Postman.
 
 ## 1. What Is Implemented
 
-- Access-token authentication using JWT Bearer.
-- Role-based authorization policy (`AdminOnly`).
-- DB-backed users (`UserAccounts`) with hashed passwords (PBKDF2 + SHA256).
-- Refresh tokens persisted in DB (`RefreshTokens`) with token rotation.
-- Seeded admin user for local development.
+- Access tokens with JWT Bearer authentication.
+- Role-based authorization with policy `AdminOnly`.
+- User validation against DB table `UserAccounts`.
+- Password verification with PBKDF2 + SHA256.
+- Refresh tokens stored in DB table `RefreshTokens`.
+- Refresh-token rotation (old token revoked after successful refresh).
 
-## 2. Main Components
+## 2. Source Files Involved
 
 ### Presentation
 
 - `src/StudentApi.Presentation/Program.cs`
-  - JWT authentication and token validation.
-  - Authorization policy registration (`AdminOnly`).
+  - Registers JWT authentication and token validation.
+  - Registers authorization policy `AdminOnly`.
+  - Enforces startup validation for `Jwt__Key` (required, min 32 chars).
 - `src/StudentApi.Presentation/Controllers/AuthController.cs`
   - `POST /api/auth/login`
   - `POST /api/auth/refresh`
 - `src/StudentApi.Presentation/Authentication/JwtTokenService.cs`
-  - Creates access tokens with `Name` and `Role` claims.
+  - Creates access token with name and role claims.
 - `src/StudentApi.Presentation/Authentication/Pbkdf2PasswordHasher.cs`
-  - Verifies password hashes from DB.
+  - Verifies hashed password from DB.
 - `src/StudentApi.Presentation/Controllers/StudentsController.cs`
-  - Protected using `[Authorize(Policy = "AdminOnly")]`.
+  - Protected by `[Authorize(Policy = "AdminOnly")]`.
 
 ### Application
 
@@ -45,30 +47,32 @@ This document describes the JWT authorization implementation added to StudentAPI
 - `src/StudentApi.Infrastructure/Configurations/RefreshTokenConfiguration.cs`
 - `src/StudentApi.Infrastructure/Persistence/ApplicationDbContext.cs`
 
-## 3. Database Migrations
+## 3. Database and Seed
+
+Migrations:
 
 - `src/StudentApi.Infrastructure/Persistence/Migrations/20260407072549_AddUserAccounts.cs`
 - `src/StudentApi.Infrastructure/Persistence/Migrations/20260407074609_AddRefreshTokens.cs`
 
-The `UserAccounts` migration seeds an admin user:
+Local seeded user:
 
 - Username: `admin`
 - Role: `Admin`
-- Password: stored as PBKDF2 hash (not plaintext)
+- Password: PBKDF2 hash for `admin123`
 
-## 4. Required Configuration
+## 4. Configuration
 
-JWT key is required from environment variable (recommended for security):
+Required environment variable:
 
 - `Jwt__Key`
 
-Other JWT settings are loaded from appsettings:
+JWT options from appsettings:
 
 - `Jwt:Issuer`
 - `Jwt:Audience`
 - `Jwt:ExpirationMinutes`
 
-### Local Run Example (PowerShell)
+Local run example (PowerShell):
 
 ```powershell
 $env:Jwt__Key="SuperLongLocalDevJwtSecretKey_ChangeMe_123456"
@@ -76,13 +80,15 @@ $env:ASPNETCORE_URLS="http://localhost:5173"
 dotnet run --project .\src\StudentApi.Presentation\StudentApi.Presentation.csproj
 ```
 
-## 5. API Endpoints
+## 5. Endpoint Contracts
 
-### Login
+### 5.1 Login
 
-- `POST /api/auth/login`
+- Method: `POST`
+- URL: `/api/auth/login`
+- Full local URL: `http://localhost:5173/api/auth/login`
 
-Request body:
+Request:
 
 ```json
 {
@@ -91,7 +97,7 @@ Request body:
 }
 ```
 
-Response body (simplified):
+Success response (shape):
 
 ```json
 {
@@ -106,11 +112,13 @@ Response body (simplified):
 }
 ```
 
-### Refresh
+### 5.2 Refresh
 
-- `POST /api/auth/refresh`
+- Method: `POST`
+- URL: `/api/auth/refresh`
+- Full local URL: `http://localhost:5173/api/auth/refresh`
 
-Request body:
+Request:
 
 ```json
 {
@@ -118,10 +126,12 @@ Request body:
 }
 ```
 
-If the refresh token is valid and active, the API returns a new access token and a new refresh token.
-Old refresh token is revoked (rotation).
+Behavior:
 
-### Protected Students CRUD
+- Valid active refresh token returns new access token and new refresh token.
+- Old refresh token is revoked and cannot be reused.
+
+### 5.3 Protected Students Endpoints
 
 - `GET /api/students?tenantId=<guid>`
 - `GET /api/students/{id}?tenantId=<guid>`
@@ -129,47 +139,142 @@ Old refresh token is revoked (rotation).
 - `PUT /api/students/{id}?tenantId=<guid>`
 - `DELETE /api/students/{id}?tenantId=<guid>`
 
-Requires:
+Requirements:
 
-- `Authorization: Bearer <access-token>`
-- User role `Admin` (via policy)
+- Header `Authorization: Bearer <access-token>`
+- Token must contain role `Admin` to satisfy policy `AdminOnly`
 
-## 6. Authorization Behavior
+## 6. Postman Step-By-Step
 
-- Missing/invalid access token -> `401 Unauthorized`
-- User without required role -> `403 Forbidden`
-- Invalid/reused refresh token -> `401 Unauthorized`
+Create Postman environment variables:
 
-## 7. Token Rotation Rules
+- `baseUrl = http://localhost:5173`
+- `tenantId = 11111111-1111-1111-1111-111111111111`
+- `accessToken` (empty initially)
+- `refreshToken` (empty initially)
 
-- Every successful refresh request issues a new refresh token.
-- Previous token is revoked and cannot be reused.
-- Reuse attempt returns `401 Unauthorized`.
+### Step 1: Login
 
-## 8. Postman Verification Flow
+Request:
 
-1. `POST /api/auth/login`
-2. Save `accessToken` and `refreshToken`.
-3. Call Students endpoint with Bearer access token.
-4. `POST /api/auth/refresh` using current refresh token.
-5. Replace tokens with returned ones.
-6. Try refreshing with old refresh token -> expect `401`.
+- `POST {{baseUrl}}/api/auth/login`
+- Body:
 
-## 9. Common Errors
+```json
+{
+  "username": "admin",
+  "password": "admin123"
+}
+```
 
-- `404 Not Found`
-  - Wrong URL (missing `/api`), wrong port, or wrong running instance.
-- `401 Unauthorized`
-  - Missing/expired/invalid access token, invalid login, or invalid refresh token.
-- Startup error about JWT key
-  - `Jwt__Key` environment variable is missing or too short.
+Expected status: `200`
 
-## 10. Security Notes
+Optional Tests tab script to save tokens:
 
-- Do not commit real secrets into `appsettings.json`.
-- Use environment variables or secret manager for `Jwt__Key`.
-- For production, add:
-  - key rotation strategy,
-  - rate limiting / brute-force protection,
+```javascript
+pm.test("Login status is 200", function () {
+  pm.response.to.have.status(200);
+});
+
+const json = pm.response.json();
+pm.environment.set("accessToken", json.data.accessToken);
+pm.environment.set("refreshToken", json.data.refreshToken);
+```
+
+### Step 2: Protected GET without token
+
+Request:
+
+- `GET {{baseUrl}}/api/students?tenantId={{tenantId}}`
+- No Authorization header
+
+Expected status: `401`
+
+### Step 3: Protected GET with token
+
+Request:
+
+- Same URL as Step 2
+- Authorization: Bearer Token -> `{{accessToken}}`
+
+Expected status: `200`
+
+### Step 4: Refresh token
+
+Request:
+
+- `POST {{baseUrl}}/api/auth/refresh`
+- Body:
+
+```json
+{
+  "refreshToken": "{{refreshToken}}"
+}
+```
+
+Expected status: `200`
+
+Optional Tests script to rotate locally stored tokens:
+
+```javascript
+pm.test("Refresh status is 200", function () {
+  pm.response.to.have.status(200);
+});
+
+const json = pm.response.json();
+pm.environment.set("accessToken", json.data.accessToken);
+pm.environment.set("refreshToken", json.data.refreshToken);
+```
+
+### Step 5: Try old refresh token again
+
+Request:
+
+- Re-send refresh request with previous already-used token
+
+Expected status: `401` (or `400`, depending on global handling)
+
+## 7. Expected Auth Outcomes
+
+- Missing access token -> `401 Unauthorized`
+- Invalid/expired access token -> `401 Unauthorized`
+- Valid token but insufficient role -> `403 Forbidden`
+- Invalid login credentials -> `401 Unauthorized`
+- Invalid or reused refresh token -> `401 Unauthorized`
+
+## 8. Troubleshooting
+
+### 404 on login
+
+Use this exact local URL:
+
+- `http://localhost:5173/api/auth/login`
+
+Common causes:
+
+- Missing `/api` prefix (`/auth/login` is not mapped)
+- Wrong port (for Docker API use container-mapped port)
+- Different instance running than expected
+
+### Startup failure for JWT
+
+If app fails at startup with JWT configuration error:
+
+- Ensure `Jwt__Key` is present
+- Ensure key length is at least 32 chars
+
+### 401 on protected endpoints after login
+
+- Confirm `Authorization` type is Bearer Token
+- Confirm token value is current access token
+- Confirm no extra quotes/spaces around token
+
+## 9. Security Notes
+
+- Do not store real secrets in `appsettings.json`.
+- Keep `Jwt__Key` in environment variables or a secret manager.
+- Recommended production additions:
+  - key rotation,
+  - login rate-limiting / brute-force controls,
   - audit logging for auth events,
-  - logout/revoke-all-sessions endpoint.
+  - logout / revoke-all-sessions endpoint.
