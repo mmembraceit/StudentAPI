@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using StudentApi.Application.Interfaces;
 using StudentApi.Application.Students;
@@ -10,6 +11,7 @@ namespace StudentApi.Presentation.Controllers;
 /// It relies on <c>IStudentService</c> to execute use cases and on <c>ApiResponse</c> to standardize output.
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(Policy = "AdminOnly")]
 public class StudentsController : ControllerBase
 {
     private readonly IStudentService _studentService;

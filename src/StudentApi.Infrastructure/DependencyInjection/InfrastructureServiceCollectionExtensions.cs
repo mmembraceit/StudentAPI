@@ -21,6 +21,8 @@ public static class InfrastructureServiceCollectionExtensions
             options.UseSqlServer(connectionString));
 
         services.AddScoped<IStudentRepository, StudentRepository>();
+        services.AddScoped<IUserAuthRepository, UserAuthRepository>();
+        services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 
         return services;
     }

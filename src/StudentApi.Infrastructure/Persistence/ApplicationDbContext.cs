@@ -17,6 +17,10 @@ public class ApplicationDbContext : DbContext
 
     public DbSet<Student> Students => Set<Student>();
 
+    public DbSet<UserAccount> UserAccounts => Set<UserAccount>();
+
+    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+
   
     /// Automatically applies all entity configurations from the assembly.
     
