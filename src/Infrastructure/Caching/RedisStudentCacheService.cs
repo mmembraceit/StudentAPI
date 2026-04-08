@@ -13,7 +13,7 @@ public sealed class RedisStudentCacheService : IStudentCacheService
 {
     private static readonly DistributedCacheEntryOptions CacheOptions = new()
     {
-        AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+        AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(30)
     };
 
     private static readonly JsonSerializerOptions SerializerOptions = new(JsonSerializerDefaults.Web);

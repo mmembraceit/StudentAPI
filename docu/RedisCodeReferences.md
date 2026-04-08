@@ -1,4 +1,4 @@
-# Redis Code References
+º# Redis Code References
 
 This document lists all source files that use Redis directly or are part of the Redis cache flow.
 
@@ -19,6 +19,14 @@ This document lists all source files that use Redis directly or are part of the 
 - File: `src/Application/Students/Services/StudentService.cs`
 - Purpose: Uses `IStudentCacheService` for read-through caching and invalidation.
 
+StudentService in `StudentService.cs` is the application-layer orchestrator for student use cases.
+It does not talk directly to EF Core or Redis internals. It depends on abstractions:
+
+Student repository for persistence operations
+Student cache service for cache operations
+Those dependencies are injected through the constructor at`StudentService.cs:14`
+
+
 ### GET flow
 - `GetByIdAsync`: tries cache first; on miss reads DB and then caches by id.
 - `GetAllAsync`: tries cache first; on miss reads DB and then caches tenant list.
@@ -34,7 +42,7 @@ This document lists all source files that use Redis directly or are part of the 
 - Purpose: Real implementation backed by `IDistributedCache` (StackExchange.Redis provider).
 
 ### Behavior
-- TTL: `AbsoluteExpirationRelativeToNow = 5 minutes`.
+- TTL: `AbsoluteExpirationRelativeToNow = 30 days`.
 - Serialization: `System.Text.Json`.
 - Cache keys:
   - `students:tenant:{tenantId}:id:{id}`
