@@ -23,7 +23,7 @@ StudentAPI is a fully functional RESTful CRUD API that manages `Student` entitie
 
 | # | Task | Status | Details |
 |---|------|--------|---------|
-| 1 | **Clean Architecture CRUD** | ✅ Done | 4 layers, full CRUD, EF Core, Repository Pattern, DTO mapping, Redis Cache |
+| 1 | **Clean Architecture CRUD** | ⚠️ Partial | 4 layers, full CRUD, EF Core, Repository Pattern, DTO mapping, Redis Cache, Azure Service Bus; SignalR and webhooks still missing |
 | 2 | **Global Error Handling** | ✅ Done | `GlobalExceptionMiddleware` maps exceptions to HTTP status codes |
 | 3 | **Generic API Response** | ✅ Done | `ApiResponse<T>` wraps all success/error responses uniformly |
 | 4 | **JWT Authentication** | ✅ Done | HMAC-SHA256 tokens, refresh rotation, PBKDF2 password hashing |
@@ -31,7 +31,7 @@ StudentAPI is a fully functional RESTful CRUD API that manages `Student` entitie
 | 6 | **Multi-Tenancy** | ✅ Done | `TenantId` on all entities, queries filtered by tenant |
 | 7 | **Entity Configurations** | ✅ Done | `IEntityTypeConfiguration<T>` for Student, UserAccount, RefreshToken |
 | 8 | **Database Seeding** | ✅ Done | Admin user seeded via `UserAccountConfiguration.HasData(...)` |
-| 9 | **Serilog** | ❌ Not done | Uses built-in `ILogger` only — Serilog not integrated |
+| 9 | **Serilog** | ✅ Done | Serilog integrated with request logging plus console and rolling file sinks |
 | 10 | **OWASP Security** | ⚠️ Partial | HTTPS redirect configured; no CORS, security headers, or rate limiting |
 
 ### Task 1 — Sub-features status
@@ -47,7 +47,7 @@ StudentAPI is a fully functional RESTful CRUD API that manages `Student` entitie
 | Redis Cache | ✅ | Dual-cache pattern (by-id + list per tenant) |
 | Azure Functions | ❌ | Not required per spec |
 | Blob Storage | ❌ | Not required per spec |
-| Azure Service Bus | ❌ | Not implemented |
+| Azure Service Bus | ✅ | Queue-based publisher with no-op fallback when not configured |
 | SignalR | ❌ | Not implemented |
 | Webhooks | ❌ | Not implemented |
 
@@ -64,6 +64,8 @@ StudentAPI is a fully functional RESTful CRUD API that manages `Student` entitie
 | 05 | [Domain Layer](05-Domain-Layer.md) | Entities, records, domain design |
 | 06 | [Auth & Postman](06-Auth-And-Postman.md) | JWT flow, refresh tokens, password hashing, Postman testing |
 | 07 | [Redis Cache vs Database](07-Redis-Cache-vs-Database.md) | Cache-first strategy, key design, invalidation, NoOp fallback |
+| 08 | [Azure Service Bus](08-Azure-Service-Bus.md) | Event publishing flow, configuration, DI, no-op fallback, and message structure |
+| 09 | [Serilog](09-Serilog.md) | Current Serilog implementation, request logging, sinks, and how the code uses `ILogger<T>` |
 
 ---
 

@@ -57,3 +57,5 @@ Test-NetConnection localhost -Port 5173
 - Azure Services Scope: [docu/tasks/11-AzureServicesScope.md](docu/tasks/11-AzureServicesScope.md)
 - JWT Authorization: [docu/JWTAuthorization.md](docu/JWTAuthorization.md)
 - Redis Code References: [docu/RedisCodeReferences.md](docu/RedisCodeReferences.md)
+- Service Bus Tutorial: [docu/TUTO/08-Azure-Service-Bus.md](docu/TUTO/08-Azure-Service-Bus.md)
+- Serilog Tutorial: [docu/TUTO/09-Serilog.md](docu/TUTO/09-Serilog.md)

@@ -1,8 +1,10 @@
+using Azure.Messaging.ServiceBus;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using StudentApi.Application.Interfaces;
 using StudentApi.Infrastructure.Caching;
+using StudentApi.Infrastructure.Messaging;
 using StudentApi.Infrastructure.Persistence;
 using StudentApi.Infrastructure.Repositories;
 
@@ -49,6 +51,24 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddScoped<IStudentRepository, StudentRepository>();
         services.AddScoped<IUserAuthRepository, UserAuthRepository>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+
+        var serviceBusOptions = new AzureServiceBusOptions
+        {
+            ConnectionString = configuration[$"{AzureServiceBusOptions.SectionName}:ConnectionString"] ?? string.Empty,
+            QueueName = configuration[$"{AzureServiceBusOptions.SectionName}:QueueName"] ?? string.Empty
+        };
+
+        if (!string.IsNullOrWhiteSpace(serviceBusOptions.ConnectionString)
+            && !string.IsNullOrWhiteSpace(serviceBusOptions.QueueName))
+        {
+            services.AddSingleton(serviceBusOptions);
+            services.AddSingleton(_ => new ServiceBusClient(serviceBusOptions.ConnectionString));
+            services.AddSingleton<IStudentEventPublisher, AzureServiceBusStudentEventPublisher>();
+        }
+        else
+        {
+            services.AddSingleton<IStudentEventPublisher, NoOpStudentEventPublisher>();
+        }
 
         return services;
     }

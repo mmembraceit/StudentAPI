@@ -1,6 +1,7 @@
 using StudentApi.Application.Interfaces;
 using StudentApi.Application.Common.Exceptions;
 using StudentApi.Application.Mappings;
+using StudentApi.Application.Students.Events;
 using StudentApi.Domain.Entities;
 
 namespace StudentApi.Application.Students;
@@ -12,11 +13,16 @@ public class StudentService : IStudentService
 {
     private readonly IStudentRepository _studentRepository;
     private readonly IStudentCacheService _studentCacheService;
+    private readonly IStudentEventPublisher _studentEventPublisher;
 
-    public StudentService(IStudentRepository studentRepository, IStudentCacheService studentCacheService)
+    public StudentService(
+        IStudentRepository studentRepository,
+        IStudentCacheService studentCacheService,
+        IStudentEventPublisher studentEventPublisher)
     {
         _studentRepository = studentRepository;
         _studentCacheService = studentCacheService;
+        _studentEventPublisher = studentEventPublisher;
     }
 
     /// <summary>
@@ -92,6 +98,15 @@ public class StudentService : IStudentService
         var studentDto = student.ToDto();
         await _studentCacheService.SetByIdAsync(studentDto, cancellationToken);
         await _studentCacheService.InvalidateAllAsync(student.TenantId, cancellationToken);
+        await _studentEventPublisher.PublishCreatedAsync(
+            new StudentCreatedIntegrationEvent(
+                Guid.NewGuid(),
+                DateTime.UtcNow,
+                studentDto.Id,
+                studentDto.TenantId,
+                studentDto.Name,
+                studentDto.DateOfBirth),
+            cancellationToken);
 
         return studentDto;
     }
@@ -124,6 +139,15 @@ public class StudentService : IStudentService
         var studentDto = updatedStudent.ToDto();
         await _studentCacheService.SetByIdAsync(studentDto, cancellationToken);
         await _studentCacheService.InvalidateAllAsync(tenantId, cancellationToken);
+        await _studentEventPublisher.PublishUpdatedAsync(
+            new StudentUpdatedIntegrationEvent(
+                Guid.NewGuid(),
+                DateTime.UtcNow,
+                studentDto.Id,
+                studentDto.TenantId,
+                studentDto.Name,
+                studentDto.DateOfBirth),
+            cancellationToken);
 
         return studentDto;
     }
@@ -146,5 +170,14 @@ public class StudentService : IStudentService
         await _studentRepository.DeleteAsync(request.Id, request.TenantId, cancellationToken);
         await _studentCacheService.InvalidateByIdAsync(request.Id, request.TenantId, cancellationToken);
         await _studentCacheService.InvalidateAllAsync(request.TenantId, cancellationToken);
+        await _studentEventPublisher.PublishDeletedAsync(
+            new StudentDeletedIntegrationEvent(
+                Guid.NewGuid(),
+                DateTime.UtcNow,
+                currentStudent.Id,
+                currentStudent.TenantId,
+                currentStudent.Name,
+                currentStudent.DateOfBirth),
+            cancellationToken);
     }
 }
