@@ -31,6 +31,13 @@ Push-Location $repoRoot
 try
 {
 
+$runningApi = Get-Process -Name "StudentApi.Presentation" -ErrorAction SilentlyContinue
+if ($null -ne $runningApi)
+{
+    Write-Host "Detected running StudentApi.Presentation process(es). Stopping to avoid build file-lock errors..." -ForegroundColor Yellow
+    $runningApi | Stop-Process -Force
+}
+
 Write-Host "[1/3] Running unit tests..." -ForegroundColor Cyan
 dotnet test .\tests\StudentApi.UnitTests\StudentApi.UnitTests.csproj --logger "console;verbosity=minimal"
 if ($LASTEXITCODE -ne 0)
@@ -54,8 +61,17 @@ if (-not (Test-ApiReachable -Url $BaseUrl))
     }
 
     Write-Host "API not reachable. Starting API automatically..." -ForegroundColor Yellow
-    $runCommand = "$env:ASPNETCORE_ENVIRONMENT='Development'; $env:Jwt__Key='SuperLongLocalDevJwtSecretKey_ChangeMe_123456'; $env:ASPNETCORE_URLS='$BaseUrl'; dotnet run --project .\src\Presentation\StudentApi.Presentation.csproj"
-    $apiProcess = Start-Process -FilePath "pwsh" -ArgumentList "-NoProfile", "-Command", $runCommand -WorkingDirectory $repoRoot -PassThru
+    $apiStdOut = Join-Path $env:TEMP "studentapi-autostart.stdout.log"
+    $apiStdErr = Join-Path $env:TEMP "studentapi-autostart.stderr.log"
+    Remove-Item $apiStdOut, $apiStdErr -ErrorAction SilentlyContinue
+
+    $apiEnvironment = @{
+        ASPNETCORE_ENVIRONMENT = "Development"
+        "Jwt__Key" = "SuperLongLocalDevJwtSecretKey_ChangeMe_123456"
+        ASPNETCORE_URLS = $BaseUrl
+    }
+
+    $apiProcess = Start-Process -FilePath "dotnet" -ArgumentList @("run", "--no-build", "--no-launch-profile", "--project", ".\src\Presentation\StudentApi.Presentation.csproj") -WorkingDirectory $repoRoot -PassThru -RedirectStandardOutput $apiStdOut -RedirectStandardError $apiStdErr -Environment $apiEnvironment
 
     $isReady = $false
     for ($i = 0; $i -lt 24; $i++)
@@ -66,11 +82,22 @@ if (-not (Test-ApiReachable -Url $BaseUrl))
             break
         }
 
+        if ($apiProcess.HasExited)
+        {
+            break
+        }
+
         Start-Sleep -Seconds 2
     }
 
     if (-not $isReady)
     {
+        $stdoutTail = if (Test-Path $apiStdOut) { (Get-Content $apiStdOut -Tail 20) -join [Environment]::NewLine } else { "(no stdout)" }
+        $stderrTail = if (Test-Path $apiStdErr) { (Get-Content $apiStdErr -Tail 20) -join [Environment]::NewLine } else { "(no stderr)" }
+        Write-Host "API startup stdout (tail):" -ForegroundColor DarkYellow
+        Write-Host $stdoutTail
+        Write-Host "API startup stderr (tail):" -ForegroundColor DarkYellow
+        Write-Host $stderrTail
         throw "API failed to start at $BaseUrl within the expected time window."
     }
 }
