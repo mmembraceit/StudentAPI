@@ -9,9 +9,8 @@ namespace StudentApi.Presentation.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-/// <summary>
 /// Authentication endpoints for login and refresh-token rotation.
-/// </summary>
+
 public class AuthController : ControllerBase
 {
     private static readonly TimeSpan RefreshTokenLifetime = TimeSpan.FromDays(7);
@@ -53,11 +52,8 @@ public class AuthController : ControllerBase
 
     [AllowAnonymous]
     [HttpPost("login")]
-    /// <summary>
+   
     /// Validates credentials and issues a new JWT access token and refresh token.
-    /// </summary>
-    /// <param name="request">Login credentials.</param>
-    /// <param name="cancellationToken">Request cancellation token.</param>
     /// <returns>
     /// <c>200 OK</c> with tokens when credentials are valid; otherwise <c>401 Unauthorized</c>.
     /// </returns>
@@ -99,11 +95,8 @@ public class AuthController : ControllerBase
 
     [AllowAnonymous]
     [HttpPost("refresh")]
-    /// <summary>
+   
     /// Exchanges an active refresh token for a new access/refresh token pair.
-    /// </summary>
-    /// <param name="request">Refresh-token exchange payload.</param>
-    /// <param name="cancellationToken">Request cancellation token.</param>
     /// <returns>
     /// <c>200 OK</c> with rotated tokens when refresh token is valid; otherwise <c>401 Unauthorized</c>.
     /// </returns>

@@ -4,9 +4,8 @@ using StudentApi.Presentation.Common;
 
 namespace StudentApi.Presentation.Middleware;
 
-/// <summary>
+
 /// Middleware that converts unhandled exceptions into consistent API error responses.
-/// </summary>
 public sealed class GlobalExceptionMiddleware
 {
     private readonly RequestDelegate _next;
@@ -18,10 +17,8 @@ public sealed class GlobalExceptionMiddleware
         _logger = logger;
     }
 
-    /// <summary>
+   
     /// Executes the next middleware component and handles unhandled exceptions.
-    /// </summary>
-    /// <param name="context">Current HTTP context.</param>
     /// <returns>A task that represents middleware execution.</returns>
     public async Task InvokeAsync(HttpContext context)
     {
@@ -35,11 +32,8 @@ public sealed class GlobalExceptionMiddleware
         }
     }
 
-    /// <summary>
+  
     /// Maps a thrown exception to status code and response body, then writes the API error contract.
-    /// </summary>
-    /// <param name="context">Current HTTP context.</param>
-    /// <param name="exception">Unhandled exception captured from downstream middleware.</param>
     /// <returns>A task that completes when the response has been written.</returns>
     private async Task HandleExceptionAsync(HttpContext context, Exception exception)
     {

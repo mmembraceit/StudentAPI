@@ -5,16 +5,12 @@ using StudentApi.Presentation.Common;
 
 namespace StudentApi.Presentation.Filters;
 
-/// <summary>
+
 /// Executes FluentValidation validators for action arguments before controller logic runs.
-/// </summary>
 public sealed class ValidationActionFilter : IAsyncActionFilter
 {
-    /// <summary>
+   
     /// Validates action arguments and short-circuits with a 400 response when errors are found.
-    /// </summary>
-    /// <param name="context">Current action execution context.</param>
-    /// <param name="next">Delegate that executes the next action pipeline step.</param>
     /// <returns>A task that completes when validation and next step execution finish.</returns>
     public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
@@ -43,10 +39,8 @@ public sealed class ValidationActionFilter : IAsyncActionFilter
         await next();
     }
 
-    /// <summary>
+  
     /// Builds a typed FluentValidation context for a runtime argument instance.
-    /// </summary>
-    /// <param name="argument">Action argument to validate.</param>
     /// <returns>Validation context consumed by FluentValidation validators.</returns>
     private static IValidationContext CreateValidationContext(object argument)
     {

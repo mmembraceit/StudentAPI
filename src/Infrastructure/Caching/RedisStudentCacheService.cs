@@ -6,9 +6,8 @@ using System.Text.Json;
 
 namespace StudentApi.Infrastructure.Caching;
 
-/// <summary>
+
 /// Redis-backed implementation of student cache operations.
-/// </summary>
 public sealed class RedisStudentCacheService : IStudentCacheService
 {
     private static readonly DistributedCacheEntryOptions CacheOptions = new()
@@ -21,23 +20,15 @@ public sealed class RedisStudentCacheService : IStudentCacheService
     private readonly IDistributedCache _distributedCache;
     private readonly ILogger<RedisStudentCacheService> _logger;
 
-    /// <summary>
+    
     /// Creates a Redis cache service.
-    /// </summary>
-    /// <param name="distributedCache">Distributed cache abstraction backed by Redis provider.</param>
-    /// <param name="logger">Logger for cache hit/miss/set/delete events.</param>
     public RedisStudentCacheService(IDistributedCache distributedCache, ILogger<RedisStudentCacheService> logger)
     {
         _distributedCache = distributedCache;
         _logger = logger;
     }
 
-    /// <summary>
     /// Gets a cached student by id and tenant.
-    /// </summary>
-    /// <param name="id">Student identifier.</param>
-    /// <param name="tenantId">Tenant scope identifier.</param>
-    /// <param name="cancellationToken">Operation cancellation token.</param>
     /// <returns>The cached student DTO or <c>null</c> on cache miss.</returns>
     public async Task<StudentDto?> GetByIdAsync(Guid id, Guid tenantId, CancellationToken cancellationToken = default)
     {
@@ -55,11 +46,7 @@ public sealed class RedisStudentCacheService : IStudentCacheService
         return JsonSerializer.Deserialize<StudentDto>(payload, SerializerOptions);
     }
 
-    /// <summary>
     /// Stores a student DTO in cache by id.
-    /// </summary>
-    /// <param name="student">Student DTO to cache.</param>
-    /// <param name="cancellationToken">Operation cancellation token.</param>
     /// <returns>A task that completes when cache write finishes.</returns>
     public Task SetByIdAsync(StudentDto student, CancellationToken cancellationToken = default)
     {
@@ -71,11 +58,8 @@ public sealed class RedisStudentCacheService : IStudentCacheService
         return _distributedCache.SetStringAsync(key, payload, CacheOptions, cancellationToken);
     }
 
-    /// <summary>
+   
     /// Gets cached student list by tenant.
-    /// </summary>
-    /// <param name="tenantId">Tenant scope identifier.</param>
-    /// <param name="cancellationToken">Operation cancellation token.</param>
     /// <returns>Cached student list or <c>null</c> on cache miss.</returns>
     public async Task<IReadOnlyList<StudentDto>?> GetAllAsync(Guid tenantId, CancellationToken cancellationToken = default)
     {
@@ -93,12 +77,8 @@ public sealed class RedisStudentCacheService : IStudentCacheService
         return JsonSerializer.Deserialize<IReadOnlyList<StudentDto>>(payload, SerializerOptions);
     }
 
-    /// <summary>
+ 
     /// Stores a tenant-scoped student list in cache.
-    /// </summary>
-    /// <param name="tenantId">Tenant scope identifier.</param>
-    /// <param name="students">Student list to cache.</param>
-    /// <param name="cancellationToken">Operation cancellation token.</param>
     /// <returns>A task that completes when cache write finishes.</returns>
     public Task SetAllAsync(Guid tenantId, IReadOnlyList<StudentDto> students, CancellationToken cancellationToken = default)
     {
@@ -110,12 +90,8 @@ public sealed class RedisStudentCacheService : IStudentCacheService
         return _distributedCache.SetStringAsync(key, payload, CacheOptions, cancellationToken);
     }
 
-    /// <summary>
+
     /// Removes cached student-by-id entry.
-    /// </summary>
-    /// <param name="id">Student identifier.</param>
-    /// <param name="tenantId">Tenant scope identifier.</param>
-    /// <param name="cancellationToken">Operation cancellation token.</param>
     /// <returns>A task that completes when cache delete finishes.</returns>
     public Task InvalidateByIdAsync(Guid id, Guid tenantId, CancellationToken cancellationToken = default)
     {
@@ -124,11 +100,8 @@ public sealed class RedisStudentCacheService : IStudentCacheService
         return _distributedCache.RemoveAsync(key, cancellationToken);
     }
 
-    /// <summary>
+   
     /// Removes cached tenant student-list entry.
-    /// </summary>
-    /// <param name="tenantId">Tenant scope identifier.</param>
-    /// <param name="cancellationToken">Operation cancellation token.</param>
     /// <returns>A task that completes when cache delete finishes.</returns>
     public Task InvalidateAllAsync(Guid tenantId, CancellationToken cancellationToken = default)
     {
@@ -137,18 +110,13 @@ public sealed class RedisStudentCacheService : IStudentCacheService
         return _distributedCache.RemoveAsync(key, cancellationToken);
     }
 
-    /// <summary>
+  
     /// Builds a stable cache key for student-by-id entries.
-    /// </summary>
-    /// <param name="id">Student identifier.</param>
-    /// <param name="tenantId">Tenant scope identifier.</param>
     /// <returns>Redis key string.</returns>
     private static string BuildByIdKey(Guid id, Guid tenantId) => $"students:tenant:{tenantId}:id:{id}";
 
-    /// <summary>
+   
     /// Builds a stable cache key for tenant student-list entries.
-    /// </summary>
-    /// <param name="tenantId">Tenant scope identifier.</param>
     /// <returns>Redis key string.</returns>
     private static string BuildAllKey(Guid tenantId) => $"students:tenant:{tenantId}:all";
 }

@@ -4,14 +4,11 @@ using StudentApi.Domain.Entities;
 
 namespace StudentApi.Infrastructure.Configurations;
 
-/// <summary>
 /// EF Core configuration for <see cref="RefreshToken"/>.
-/// </summary>
 public sealed class RefreshTokenConfiguration : IEntityTypeConfiguration<RefreshToken>
 {
-    /// <summary>
+  
     /// Configures table mapping, constraints, and indexes for refresh tokens.
-    /// </summary>
     /// <param name="builder">Entity type builder instance.</param>
     public void Configure(EntityTypeBuilder<RefreshToken> builder)
     {

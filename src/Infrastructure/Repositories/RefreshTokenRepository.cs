@@ -5,9 +5,8 @@ using StudentApi.Infrastructure.Persistence;
 
 namespace StudentApi.Infrastructure.Repositories;
 
-/// <summary>
+
 /// EF Core implementation of refresh-token persistence operations.
-/// </summary>
 public sealed class RefreshTokenRepository : IRefreshTokenRepository
 {
     private readonly ApplicationDbContext _dbContext;
@@ -17,11 +16,8 @@ public sealed class RefreshTokenRepository : IRefreshTokenRepository
         _dbContext = dbContext;
     }
 
-    /// <summary>
+ 
     /// Stores a refresh token entity.
-    /// </summary>
-    /// <param name="refreshToken">Refresh token entity to insert.</param>
-    /// <param name="cancellationToken">Operation cancellation token.</param>
     /// <returns>A task that completes when insert finishes.</returns>
     public async Task AddAsync(RefreshToken refreshToken, CancellationToken cancellationToken = default)
     {
@@ -29,11 +25,8 @@ public sealed class RefreshTokenRepository : IRefreshTokenRepository
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    /// <summary>
+  
     /// Gets an active refresh token by token hash.
-    /// </summary>
-    /// <param name="tokenHash">Hashed token value.</param>
-    /// <param name="cancellationToken">Operation cancellation token.</param>
     /// <returns>The active refresh-token entity or <c>null</c>.</returns>
     public async Task<RefreshToken?> GetActiveByTokenHashAsync(string tokenHash, CancellationToken cancellationToken = default)
     {
@@ -48,12 +41,8 @@ public sealed class RefreshTokenRepository : IRefreshTokenRepository
                 cancellationToken);
     }
 
-    /// <summary>
+   
     /// Revokes a refresh token and records the replacement token hash.
-    /// </summary>
-    /// <param name="id">Refresh token identifier.</param>
-    /// <param name="replacedByTokenHash">Replacement token hash.</param>
-    /// <param name="cancellationToken">Operation cancellation token.</param>
     /// <returns>A task that completes when update finishes.</returns>
     public async Task RevokeAsync(Guid id, string replacedByTokenHash, CancellationToken cancellationToken = default)
     {

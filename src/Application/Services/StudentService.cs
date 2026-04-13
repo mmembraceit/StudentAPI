@@ -6,9 +6,8 @@ using StudentApi.Domain.Entities;
 
 namespace StudentApi.Application.Students;
 
-/// <summary>
+
 /// Implements student use cases in the application layer.
-/// </summary>
 public class StudentService : IStudentService
 {
     private readonly IStudentRepository _studentRepository;
@@ -25,12 +24,8 @@ public class StudentService : IStudentService
         _studentEventPublisher = studentEventPublisher;
     }
 
-    /// <summary>
+   
     /// Gets a student by id and tenant, using cache first and repository fallback.
-    /// </summary>
-    /// <param name="id">Student identifier.</param>
-    /// <param name="tenantId">Tenant scope identifier.</param>
-    /// <param name="cancellationToken">Operation cancellation token.</param>
     /// <returns>The matching student DTO.</returns>
     public async Task<StudentDto> GetByIdAsync(Guid id, Guid tenantId, CancellationToken cancellationToken = default)
     {
@@ -54,11 +49,8 @@ public class StudentService : IStudentService
         return studentDto;
     }
 
-    /// <summary>
+  
     /// Gets all students for a tenant, using cache first and repository fallback.
-    /// </summary>
-    /// <param name="tenantId">Tenant scope identifier.</param>
-    /// <param name="cancellationToken">Operation cancellation token.</param>
     /// <returns>Student DTO list for the tenant.</returns>
     public async Task<IReadOnlyList<StudentDto>> GetAllAsync(Guid tenantId, CancellationToken cancellationToken = default)
     {
@@ -77,11 +69,8 @@ public class StudentService : IStudentService
         return studentDtos;
     }
 
-    /// <summary>
+   
     /// Creates a new student, stores it, then updates related cache entries.
-    /// </summary>
-    /// <param name="request">Student creation payload.</param>
-    /// <param name="cancellationToken">Operation cancellation token.</param>
     /// <returns>The created student DTO.</returns>
     public async Task<StudentDto> CreateAsync(CreateStudentRequest request, CancellationToken cancellationToken = default)
     {
@@ -111,13 +100,8 @@ public class StudentService : IStudentService
         return studentDto;
     }
 
-    /// <summary>
+    
     /// Updates an existing student inside tenant scope and refreshes cache entries.
-    /// </summary>
-    /// <param name="id">Student identifier.</param>
-    /// <param name="tenantId">Tenant scope identifier.</param>
-    /// <param name="request">Student update payload.</param>
-    /// <param name="cancellationToken">Operation cancellation token.</param>
     /// <returns>The updated student DTO.</returns>
     public async Task<StudentDto> UpdateAsync(Guid id, Guid tenantId, UpdateStudentRequest request, CancellationToken cancellationToken = default)
     {
@@ -152,11 +136,8 @@ public class StudentService : IStudentService
         return studentDto;
     }
 
-    /// <summary>
+   
     /// Deletes an existing student inside tenant scope and invalidates related cache entries.
-    /// </summary>
-    /// <param name="request">Delete payload with student and tenant identifiers.</param>
-    /// <param name="cancellationToken">Operation cancellation token.</param>
     /// <returns>A task that completes when delete finishes.</returns>
     public async Task DeleteAsync(DeleteStudentRequest request, CancellationToken cancellationToken = default)
     {

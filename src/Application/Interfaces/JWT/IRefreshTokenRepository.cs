@@ -2,9 +2,7 @@ using StudentApi.Domain.Entities;
 
 namespace StudentApi.Application.Interfaces;
 
-/// <summary>
 /// Persistence contract for refresh-token lifecycle operations.
-/// </summary>
 public interface IRefreshTokenRepository
 {
    

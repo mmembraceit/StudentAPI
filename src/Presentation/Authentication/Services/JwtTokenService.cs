@@ -6,26 +6,21 @@ using System.Text;
 
 namespace StudentApi.Presentation.Authentication;
 
-/// <summary>
+
 /// Default JWT implementation that issues HMAC-SHA256 access tokens.
-/// </summary>
 public sealed class JwtTokenService : IJwtTokenService
 {
     private readonly JwtOptions _jwtOptions;
 
-    /// <summary>
+  
     /// Initializes a token service using configured JWT options.
-    /// </summary>
     public JwtTokenService(IOptions<JwtOptions> jwtOptions)
     {
         _jwtOptions = jwtOptions.Value;
     }
 
-    /// <summary>
+    
     /// Builds and signs an access token with subject/name and role claims.
-    /// </summary>
-    /// <param name="username">Authenticated username embedded in identity claims.</param>
-    /// <param name="role">Role claim used by authorization policies.</param>
     /// <returns>Serialized JWT access token.</returns>
     public string GenerateToken(string username, string role)
     {

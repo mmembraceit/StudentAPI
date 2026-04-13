@@ -4,14 +4,12 @@ using StudentApi.Domain.Entities;
 
 namespace StudentApi.Infrastructure.Configurations;
 
-/// <summary>
+
 /// EF Core configuration for <see cref="Student"/>.
-/// </summary>
 public class StudentConfiguration : IEntityTypeConfiguration<Student>
 {
-    /// <summary>
+   
     /// Configures table mapping, constraints, and indexes for <see cref="Student"/>.
-    /// </summary>
     /// <param name="builder">Entity type builder instance.</param>
     public void Configure(EntityTypeBuilder<Student> builder)
     {

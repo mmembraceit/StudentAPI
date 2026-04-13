@@ -4,10 +4,10 @@ namespace StudentApi.Domain.Entities;
 /// Domain entity that stores refresh-token lifecycle data.
 /// - Refresh token identifier.
 /// - Owning user account identifier.
-/// - Username snapshot at token issue time.
-/// - Role snapshot at token issue time.
+/// - Username snapshot at token created time.
+/// - Role snapshot at token created time.
 /// - SHA-256 hash of the refresh token value.
-/// - UTC timestamp when the token was issued.
+/// - UTC timestamp when the token was created.
 /// - UTC timestamp when the token expires.
 /// - UTC timestamp when the token was revoked, if revoked.
 /// - Hash of the token that replaced this token during rotation.
