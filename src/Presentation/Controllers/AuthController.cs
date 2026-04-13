@@ -39,19 +39,16 @@ public class AuthController : ControllerBase
         _jwtOptions = jwtOptions.Value;
     }
 
-    /// <summary>
+
     /// Login request payload.
-    /// </summary>
     public sealed record LoginRequest(string Username, string Password);
 
-    /// <summary>
+
     /// Authentication response with access token and refresh token pair.
-    /// </summary>
     public sealed record LoginResponse(string AccessToken, DateTime ExpiresAtUtc, string RefreshToken, DateTime RefreshTokenExpiresAtUtc);
 
-    /// <summary>
+
     /// Refresh request payload.
-    /// </summary>
     public sealed record RefreshRequest(string RefreshToken);
 
     [AllowAnonymous]

@@ -1,0 +1,1 @@
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\tests\scripts\run-all-tests.ps1 -AutoStartApi:$false
