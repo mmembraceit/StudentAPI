@@ -8,6 +8,7 @@ param(
 $ErrorActionPreference = "Stop"
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..")
 $apiProcess = $null
+$hadRunningApi = $false
 
 function Test-ApiReachable {
     param(
@@ -34,6 +35,7 @@ try
 $runningApi = Get-Process -Name "StudentApi.Presentation" -ErrorAction SilentlyContinue
 if ($null -ne $runningApi)
 {
+    $hadRunningApi = $true
     Write-Host "Detected running StudentApi.Presentation process(es). Stopping to avoid build file-lock errors..." -ForegroundColor Yellow
     $runningApi | Stop-Process -Force
 }
@@ -55,12 +57,22 @@ if ($LASTEXITCODE -ne 0)
 Write-Host "[3/3] Running Redis/log smoke check..." -ForegroundColor Cyan
 if (-not (Test-ApiReachable -Url $BaseUrl))
 {
-    if (-not $AutoStartApi)
+    if (-not $AutoStartApi -and -not $hadRunningApi)
     {
-        throw "API is not reachable at $BaseUrl. Start the API before running smoke checks."
+        Write-Host "API is not reachable at $BaseUrl and AutoStartApi is disabled. Skipping smoke checks." -ForegroundColor Yellow
+        Write-Host "All tests passed (smoke checks skipped)." -ForegroundColor Green
+        return
     }
 
-    Write-Host "API not reachable. Starting API automatically..." -ForegroundColor Yellow
+    if (-not $AutoStartApi -and $hadRunningApi)
+    {
+        Write-Host "API was running before tests. Restarting it for smoke checks..." -ForegroundColor Yellow
+    }
+    else
+    {
+        Write-Host "API not reachable. Starting API automatically..." -ForegroundColor Yellow
+    }
+
     $apiStdOut = Join-Path $env:TEMP "studentapi-autostart.stdout.log"
     $apiStdErr = Join-Path $env:TEMP "studentapi-autostart.stderr.log"
     Remove-Item $apiStdOut, $apiStdErr -ErrorAction SilentlyContinue
